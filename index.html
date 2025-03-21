@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paper Lantern Journey</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            overflow: hidden;
+            background: linear-gradient(to bottom, #0a0a2a, #1a1a4a, #2a2a6a);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: twinkle 2s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.2; }
+            100% { opacity: 1; }
+        }
+
+        .lantern-creator {
+            background-color: rgba(10, 10, 40, 0.7);
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #ffcc80;
+            text-shadow: 0 0 5px rgba(255, 204, 128, 0.6);
+        }
+
+        .creator-content {
+            display: flex;
+            gap: 20px;
+        }
+
+        .design-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .preview {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            position: relative;
+            min-height: 300px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ffcc80;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #484880;
+            background-color: rgba(20, 20, 60, 0.8);
+            color: white;
+        }
+
+        input[type="color"] {
+            height: 40px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            background: rgba(20, 20, 60, 0.8);
+            height: 5px;
+            border-radius: 5px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #ffcc80;
+            cursor: pointer;
+        }
+
+        .pattern-options {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .pattern-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            background-size: contain;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .pattern-option.selected {
+            border-color: #ffcc80;
+            box-shadow: 0 0 8px #ffcc80;
+        }
+
+        textarea {
+            resize: none;
+            height: 60px;
+        }
+
+        button {
+            background-color: #ff6d00;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #ff8c00;
+        }
+
+        .lantern {
+            position: absolute;
+            width: 60px;
+            height: 90px;
+            transform-origin: center bottom;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.5s ease;
+            pointer-events: none;
+        }
+
+        .lantern-main {
+            position: relative;
+            width: 100%;
+            height: 70px;
+            border-radius: 50% 50% 8px 8px / 60% 60% 8px 8px;
+            background-color: #ffdb8c;
+            box-shadow: 0 0 15px rgba(255, 219, 140, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .lantern-pattern {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.6;
+            background-size: contain;
+        }
+
+        .lantern-text {
+            position: absolute;
+            color: #5a3921;
+            font-size: 7px;
+            text-align: center;
+            padding: 5px;
+            max-width: 90%;
+            pointer-events: none;
+            overflow-wrap: break-word;
+            font-weight: bold;
+        }
+
+        .lantern-bottom {
+            width: 15px;
+            height: 10px;
+            background-color: #d66d00;
+            border-radius: 0 0 50% 50%;
+        }
+
+        .lantern-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: inherit;
+            opacity: 0.4;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 70%);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .flame {
+            position: absolute;
+            bottom: -5px;
+            width: 8px;
+            height: 12px;
+            background: radial-gradient(ellipse at bottom, #ff7800, #ffab00);
+            border-radius: 50% 50% 20% 20% / 40% 40% 60% 60%;
+            filter: blur(1px);
+            animation: flicker 0.5s infinite alternate;
+            transform-origin: center bottom;
+            z-index: -1;
+        }
+
+        @keyframes flicker {
+            0% { transform: scaleY(1) scaleX(1); }
+            25% { transform: scaleY(1.1) scaleX(0.9); }
+            50% { transform: scaleY(0.9) scaleX(1.1); }
+            75% { transform: scaleY(1.05) scaleX(0.95); }
+            100% { transform: scaleY(1) scaleX(1); }
+        }
+
+        #scoreDisplay {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background-color: rgba(10, 10, 40, 0.7);
+            padding: 10px 15px;
+            border-radius: 20px;
+            color: #ffcc80;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .mobile-warning {
+            display: none;
+            color: #ffcc80;
+            text-align: center;
+            padding: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .creator-content {
+                flex-direction: column;
+            }
+            
+            .preview {
+                min-height: 200px;
+            }
+            
+            .mobile-warning {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    <div id="scoreDisplay">Score: 0</div>
+    
+    <div class="lantern-creator">
+        <h1>✨ Paper Lantern Journey 🏮</h1>
+        <p class="mobile-warning">For best experience, use on desktop</p>
+        
+        <div class="creator-content">
+            <div class="design-panel">
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="lanternColor">Lantern Color:</label>
+                        <input type="color" id="lanternColor" value="#ffdb8c">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Pattern Style:</label>
+                        <div class="pattern-options" id="patternOptions">
+                            <div class="pattern-option selected" data-pattern="none" style="background-color: #888; opacity: 0.3;"></div>
+                            <div class="pattern-option" data-pattern="dots" style="background-image: radial-gradient(circle, #000 2px, transparent 2px); background-size: 10px 10px;"></div>
+                            <div class="pattern-option" data-pattern="stripes" style="background-image: linear-gradient(45deg, #000 25%, transparent 25%, transparent 50%, #000 50%, #000 75%, transparent 75%, transparent); background-size: 10px 10px;"></div>
+                            <div class="pattern-option" data-pattern="flowers" style="background-image: radial-gradient(circle at 30% 30%, #000 2px, transparent 4px), radial-gradient(circle at 70% 30%, #000 2px, transparent 4px), radial-gradient(circle at 50% 60%, #000 4px, transparent 6px), radial-gradient(circle at 50% 40%, transparent 8px, #000 8px, #000 10px, transparent 10px); background-size: 20px 20px;"></div>
+                            <div class="pattern-option" data-pattern="stars" style="background-image: radial-gradient(circle, #000 1px, transparent 1px); background-size: 15px 15px;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="patternOpacity">Pattern Opacity:</label>
+                        <input type="range" id="patternOpacity" min="0.1" max="1" step="0.1" value="0.6">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="lanternSize">Lantern Size:</label>
+                        <input type="range" id="lanternSize" min="0.5" max="1.5" step="0.1" value="1">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="wishText">Write Your Wish:</label>
+                        <textarea id="wishText" placeholder="Write a short wish or message..."></textarea>
+                    </div>
+                </div>
+                
+                <button id="launchBtn">Launch Lantern</button>
+            </div>
+            
+            <div class="preview" id="preview">
+                <div class="lantern" id="previewLantern" style="position: relative;">
+                    <div class="lantern-main">
+                        <div class="lantern-pattern"></div>
+                        <div class="lantern-text"></div>
+                        <div class="lantern-glow"></div>
+                    </div>
+                    <div class="lantern-bottom"></div>
+                    <div class="flame"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize variables
+        let score = 0;
+        let activeLanterns = [];
+        const maxLanterns = 20;
+        let windDirection = 0.5; // -1 to 1
+        let windStrength = 0.2;
+        
+        // Create stars
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 200; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = `${Math.random() * 2 + 1}px`;
+            star.style.height = star.style.width;
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.animationDuration = `${Math.random() * 3 + 1}s`;
+            star.style.animationDelay = `${Math.random() * 2}s`;
+            starsContainer.appendChild(star);
+        }
+        
+        // Get elements
+        const lanternColor = document.getElementById('lanternColor');
+        const patternOptions = document.querySelectorAll('.pattern-option');
+        const patternOpacity = document.getElementById('patternOpacity');
+        const lanternSize = document.getElementById('lanternSize');
+        const wishText = document.getElementById('wishText');
+        const launchBtn = document.getElementById('launchBtn');
+        const previewLantern = document.getElementById('previewLantern');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        
+        // Current lantern design
+        const currentDesign = {
+            color: lanternColor.value,
+            pattern: 'none',
+            patternOpacity: patternOpacity.value,
+            size: lanternSize.value,
+            wish: ''
+        };
+        
+        // Update the preview lantern
+        function updatePreview() {
+            const lanternMain = previewLantern.querySelector('.lantern-main');
+            const lanternPattern = previewLantern.querySelector('.lantern-pattern');
+            const lanternText = previewLantern.querySelector('.lantern-text');
+            
+            // Update color
+            lanternMain.style.backgroundColor = currentDesign.color;
+            
+            // Update pattern
+            if (currentDesign.pattern === 'none') {
+                lanternPattern.style.backgroundImage = 'none';
+            } else if (currentDesign.pattern === 'dots') {
+                lanternPattern.style.backgroundImage = 'radial-gradient(circle, #000 2px, transparent 2px)';
+                lanternPattern.style.backgroundSize = '10px 10px';
+            } else if (currentDesign.pattern === 'stripes') {
+                lanternPattern.style.backgroundImage = 'linear-gradient(45deg, #000 25%, transparent 25%, transparent 50%, #000 50%, #000 75%, transparent 75%, transparent)';
+                lanternPattern.style.backgroundSize = '10px 10px';
+            } else if (currentDesign.pattern === 'flowers') {
+                lanternPattern.style.backgroundImage = 'radial-gradient(circle at 30% 30%, #000 2px, transparent 4px), radial-gradient(circle at 70% 30%, #000 2px, transparent 4px), radial-gradient(circle at 50% 60%, #000 4px, transparent 6px), radial-gradient(circle at 50% 40%, transparent 8px, #000 8px, #000 10px, transparent 10px)';
+                lanternPattern.style.backgroundSize = '20px 20px';
+            } else if (currentDesign.pattern === 'stars') {
+                lanternPattern.style.backgroundImage = 'radial-gradient(circle, #000 1px, transparent 1px)';
+                lanternPattern.style.backgroundSize = '15px 15px';
+            }
+            
+            // Update pattern opacity
+            lanternPattern.style.opacity = currentDesign.patternOpacity;
+            
+            // Update size
+            previewLantern.style.transform = `scale(${currentDesign.size})`;
+            
+            // Update wish text
+            lanternText.textContent = currentDesign.wish;
+        }
+        
+        // Pattern selection
+        patternOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                patternOptions.forEach(opt => opt.classList.remove('selected'));
+                option.classList.add('selected');
+                currentDesign.pattern = option.dataset.pattern;
+                updatePreview();
+            });
+        });
+        
+        // Input event listeners
+        lanternColor.addEventListener('input', () => {
+            currentDesign.color = lanternColor.value;
+            updatePreview();
+        });
+        
+        patternOpacity.addEventListener('input', () => {
+            currentDesign.patternOpacity = patternOpacity.value;
+            updatePreview();
+        });
+        
+        lanternSize.addEventListener('input', () => {
+            currentDesign.size = lanternSize.value;
+            updatePreview();
+        });
+        
+        wishText.addEventListener('input', () => {
+            currentDesign.wish = wishText.value;
+            updatePreview();
+        });
+        
+        // Launch lantern
+        launchBtn.addEventListener('click', () => {
+            launchLantern();
+        });
+        
+        function launchLantern() {
+            // Create new lantern element
+            const lantern = document.createElement('div');
+            lantern.className = 'lantern';
+            
+            // Set initial position
+            const startX = 100 + Math.random() * (window.innerWidth - 200);
+            lantern.style.left = `${startX}px`;
+            lantern.style.bottom = '100px';
+            
+            // Create lantern parts
+            lantern.innerHTML = `
+                <div class="lantern-main">
+                    <div class="lantern-pattern"></div>
+                    <div class="lantern-text"></div>
+                    <div class="lantern-glow"></div>
+                </div>
+                <div class="lantern-bottom"></div>
+                <div class="flame"></div>
+            `;
+            
+            // Apply design
+            const lanternMain = lantern.querySelector('.lantern-main');
+            const lanternPattern = lantern.querySelector('.lantern-pattern');
+            const lanternText = lantern.querySelector('.lantern-text');
+            
+            lanternMain.style.backgroundColor = currentDesign.color;
+            
+            if (currentDesign.pattern === 'none') {
+                lanternPattern.style.backgroundImage = 'none';
+            } else if (currentDesign.pattern === 'dots') {
+                lanternPattern.style.backgroundImage = 'radial-gradient(circle, #000 2px, transparent 2px)';
+                lanternPattern.style.backgroundSize = '10px 10px';
+            } else if (currentDesign.pattern === 'stripes') {
+                lanternPattern.style.backgroundImage = 'linear-gradient(45deg, #000 25%, transparent 25%, transparent 50%, #000 50%, #000 75%, transparent 75%, transparent)';
+                lanternPattern.style.backgroundSize = '10px 10px';
+            } else if (currentDesign.pattern === 'flowers') {
+                lanternPattern.style.backgroundImage = 'radial-gradient(circle at 30% 30%, #000 2px, transparent 4px), radial-gradient(circle at 70% 30%, #000 2px, transparent 4px), radial-gradient(circle at 50% 60%, #000 4px, transparent 6px), radial-gradient(circle at 50% 40%, transparent 8px, #000 8px, #000 10px, transparent 10px)';
+                lanternPattern.style.backgroundSize = '20px 20px';
+            } else if (currentDesign.pattern === 'stars') {
+                lanternPattern.style.backgroundImage = 'radial-gradient(circle, #000 1px, transparent 1px)';
+                lanternPattern.style.backgroundSize = '15px 15px';
+            }
+            
+            lanternPattern.style.opacity = currentDesign.patternOpacity;
+            lantern.style.transform = `scale(${currentDesign.size})`;
+            lanternText.textContent = currentDesign.wish;
+            
+            // Create lantern object to track physics
+            const lanternObj = {
+                element: lantern,
+                x: startX,
+                y: 100,
+                xVelocity: Math.random() * 0.4 - 0.2,
+                yVelocity: 0.5 + Math.random() * 0.5,
+                wobble: Math.random() * 0.1 - 0.05,
+                wobbleDir: Math.random() < 0.5 ? 1 : -1,
+                wobbleSpeed: 0.01 + Math.random() * 0.02,
+                rotation: Math.random() * 6 - 3,
+                size: parseFloat(currentDesign.size),
+                color: currentDesign.color,
+                pattern: currentDesign.pattern,
+                wish: currentDesign.wish.length
+            };
+            
+            // Calculate score based on design balance
+            let designScore = 0;
+            
+            // Size score - medium sizes score higher
+            const sizeScore = 10 - Math.abs(lanternObj.size - 1) * 10;
+            
+            // Pattern score - patterns score higher than no pattern
+            const patternScore = lanternObj.pattern === 'none' ? 0 : 5;
+            
+            // Wish score - having a wish scores points, but not too long
+            const wishScore = lanternObj.wish > 0 ? Math.min(lanternObj.wish, 20) : 0;
+            
+            // Calculate total score
+            designScore = Math.floor(sizeScore + patternScore + wishScore);
+            
+            // Add score
+            score += designScore;
+            scoreDisplay.textContent = `Score: ${score}`;
+            
+            // Append to body
+            document.body.appendChild(lantern);
+            
+            // Add to active lanterns
+            activeLanterns.push(lanternObj);
+            
+            // Remove oldest lantern if too many
+            if (activeLanterns.length > maxLanterns) {
+                const oldest = activeLanterns.shift();
+                if (oldest.element.parentNode) {
+                    oldest.element.parentNode.removeChild(oldest.element);
+                }
+            }
+            
+            // Show launch success
+            launchBtn.textContent = `Launched! +${designScore} points`;
+            setTimeout(() => {
+                launchBtn.textContent = 'Launch Lantern';
+            }, 1500);
+        }
+        
+        // Animation loop
+        function animateLanterns() {
+            // Change wind slightly
+            windDirection += (Math.random() * 0.1 - 0.05);
+            windDirection = Math.max(-1, Math.min(1, windDirection));
+            windStrength = 0.1 + Math.random() * 0.2;
+            
+            // Update each lantern
+            activeLanterns.forEach((lantern, index) => {
+                // Apply physics
+                lantern.yVelocity += 0.001; // Slight acceleration upward
+                lantern.xVelocity += windDirection * windStrength * 0.01;
+                
+                // Wobble effect
+                lantern.wobble += lantern.wobbleSpeed * lantern.wobbleDir;
+                if (Math.abs(lantern.wobble) > 0.2) {
+                    lantern.wobbleDir *= -1;
+                }
+                
+                // Update position
+                lantern.x += lantern.xVelocity;
+                lantern.y += lantern.yVelocity;
+                
+                // Apply position
+                lantern.element.style.left = `${lantern.x}px`;
+                lantern.element.style.bottom = `${lantern.y}px`;
+                lantern.element.style.transform = `scale(${lantern.size}) rotate(${lantern.rotation + lantern.wobble * 10}deg)`;
+                
+                // Remove if out of bounds
+                if (lantern.y > window.innerHeight + 200 || 
+                    lantern.x < -100 || 
+                    lantern.x > window.innerWidth + 100) {
+                    if (lantern.element.parentNode) {
+                        lantern.element.parentNode.removeChild(lantern.element);
+                        activeLanterns.splice(index, 1);
+                    }
+                }
+            });
+            
+            requestAnimationFrame(animateLanterns);
+        }
+        
+        // Start animation
+        updatePreview();
+        animateLanterns();
+    </script>
+</body>
+</html>
